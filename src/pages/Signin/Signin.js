@@ -33,7 +33,7 @@ const Signin = () => {
     <>
       <div className="signin_main">
         <div className="signin_img">
-          <h4 className="signin_img_heading">Signin To Inventory System</h4>
+          <h4 className="signin_img_heading">Signin To Inventory System for</h4>
         </div>
         <div className="signin_form">
           <Formik
