@@ -3,6 +3,7 @@ import { useEffect, useState, useContext } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import SidebarMenu from "./Sidebar";
 import "./style.css";
+import Logo from '../../assets/Logo.png'
 import { AuthContext } from "../../contexts/auth";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faProductHunt } from "@fortawesome/free-brands-svg-icons";
@@ -18,12 +19,13 @@ import {
   faC,
   faUser,
   faFileWaveform,
+  faUsers,
 } from "@fortawesome/free-solid-svg-icons";
 const routes = [
   {
     path: "/createuser",
     name: "Clients",
-    icon: <FontAwesomeIcon icon={faBasketShopping} />,
+    icon: <FontAwesomeIcon icon={faUsers} />,
   },
   {
     path: "/",
@@ -166,7 +168,7 @@ const SideBar = ({ children }) => {
                   ></motion.h1>
                 )}
               </AnimatePresence>
-
+           {isOpen?<img src={Logo} style={{width: "62%"}} />:''}
               <div
                 className="bars"
                 style={{ fontSize: "22px", cursor: "pointer" }}
