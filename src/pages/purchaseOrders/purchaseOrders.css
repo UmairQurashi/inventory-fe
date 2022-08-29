@@ -22,3 +22,8 @@ padding: 1rem;
 .selectclient_main{
     margin-right: 3rem;
 }
+.scroll_bar{
+    
+        overflow:scroll;
+        height:100px;
+}

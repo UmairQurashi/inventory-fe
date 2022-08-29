@@ -458,6 +458,7 @@ const PurchaseOrders = () => {
     </div>
     <div className="table_divss">
     <h5>History</h5>
+    <div className="scroll_bar" >
         <DataTable
           data={tableData}
           columns={clientDataColumns}
@@ -465,6 +466,7 @@ const PurchaseOrders = () => {
           responsive
           pagination
         />
+        </div>
       </div>
 
 
