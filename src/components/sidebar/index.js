@@ -219,7 +219,7 @@ const SideBar = ({ children }) => {
             </section>
           </motion.div>
 
-          <main style={{ margin: "7px", width: "100%" }}>{children}</main>
+          <main style={{ margin: "7px", width: "100%",overflow: "hidden" }}>{children}</main>
         </div>
       ) : (
         children
