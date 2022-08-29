@@ -24,6 +24,5 @@ padding: 1rem;
 }
 .scroll_bar{
     
-        overflow:scroll;
-        height:100px;
+    overflow-x:auto
 }
