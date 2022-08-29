@@ -1,26 +1,48 @@
 import React, { useEffect, useState } from "react";
 import api from "../../api/index";
-import { Form, Col } from "react-bootstrap";
+import DataTable from "react-data-table-component";
+import { Form, Col, Button ,Modal,Row,Table} from "react-bootstrap";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus, faPen, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { Formik } from "formik";
 import * as yup from "yup";
 import "./purchaseOrders.css";
 const PurchaseOrders = () => {
+  const [show, setShow] = useState(false);
+  const handleClose = () => {
+    setShow(false);
+  };
+  const handleShow = () => setShow(true);
+
   const [products, setProducts] = useState([]);
   const [itemname, setItemname] = useState([]);
   const [points, setPoints] = useState([]);
 
   const [clients, setClients] = useState([])
-  const [clientsName, setClientsName] = useState([])
+  const [clientsName, setClientsName] = useState(null)
+  const [tableData, setTableData] = useState([])
 
-  const schema = yup.object().shape({
-    productType: yup.string().required("Enter a valid productType."),
-    itemType: yup.string().required("Enter a valid itemType."),
-    points: yup.string().required("Enter a valid points."),
-  });
+  
+
+  const [submitData, setSubmitData] = useState({
+   clientData:"",
+   productName:"",
+   itamName:"",
+   productPoint:"",
+   productLength:""
+  })
+  
 
   const clientSchema = yup.object().shape({
     client: yup.string().required("Enter a valid client."),
+    productType: yup.string().required("Enter a valid productType."),
+    itemName: yup.string().required("Enter a valid itemName."),
+    points: yup.string().required("Enter a valid points."),
+    Length: yup.string().required("Enter a valid Length."),
   });
+
+  
+
 
   const getProduct = async (values, resetForm) => {
     try {
@@ -39,9 +61,21 @@ const PurchaseOrders = () => {
       console.log(error);
     }
   }
+  
+  const purchaseOrderTableData = async (values, resetForm) => {
+    try {
+      let res = await api.get("/purchaseorder");
+      setTableData(res.data);
+      console.log("umair",tableData)
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   useEffect(() => {
     getProduct();
     getClients();
+    purchaseOrderTableData();
 
   }, []);
 
@@ -71,23 +105,154 @@ const PurchaseOrders = () => {
     try {
       formik.handleChange(e);
       let client = e.target.value;
-      let res = await api.get(`/clients/identifyclients/${client}`);
-      setClientsName(res.data);
+     let foundClient= clients.find((elem)=>{
+        return elem._id===client
+      })
+
+      console.log(foundClient)
+      setClientsName(foundClient)
+    } catch (error) {
+      console.log(error);
+    }
+  };
+ 
+  let { clientData,productName,itamName,productPoint,productLength}=submitData
+  const handleSubmit = async (values, resetForm) => {
+    setClientsName(null)
+    console.log("Ali", tableData.length)
+    try {
+      // Find Client
+       clientData= clients.find((elem)=>{
+        return elem._id===values.client
+      })
+      console.log(clientData)
+
+      //  fIND PRODUCT Type
+     productName= products.find((elem)=>{
+        return elem._id===values.productType
+      })
+      console.log(productName)
+      
+      // Find Item Name
+      itamName= itemname.find((elem)=>{
+          return elem._id===values.itemName
+        })
+        console.log(itamName)
+
+            // Find Point
+           productPoint= points.find((elem)=>{
+                  return elem._id===values.points
+                })
+                console.log(productPoint)
+
+               // Find Length
+           productLength=values.Length
+                console.log(productLength)
+
+                // set State
+          setSubmitData({clientData:clientData, productName: productName.name,itamName:itamName.name,productPoint: productPoint.value,productLength: productLength})
+
+          handleShow()
+          // addb invoice number
+          values.invoice= tableData.length+1
+        let res = await api.post("/purchaseorder", values);
+          console.log(res.data)
+          setTableData([...tableData,res.data])
+          console.log(tableData)
+          // console.log(values)
+          purchaseOrderTableData()
+          resetForm()
+        } catch (error) {
+          console.log(error);
+    }
+  };
+
+  const deleteClient = async (id) => {
+    try {
+      let res = await api.delete(`/purchaseorder/${id}`);
+      setTableData(
+        tableData.filter((elem) => {
+          return elem._id !== id;
+        })
+      );
     } catch (error) {
       console.log(error);
     }
   };
 
-  const handleSubmit = async (values, resetForm) => {
-    try {
-      // let res = await api.post("/users/login", values);
-      // loginSuccess(res.data.token, res.data.user);
-      // navigate("/");
-      // resetForm();
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  
+  const clientDataColumns = [
+    {
+      name: "Invoice.no.",
+      selector: (row) => row.invoice,
+      sortable: true,
+      grow: 2,
+    },
+    {
+      name: "Client Name",
+      selector: (row) => row.client.Name,
+      sortable: true,
+      grow: 2,
+    },
+    {
+      name: "Phone Number",
+      selector: (row) => row.client.PhoneNumber,
+      sortable: true,
+      grow: 2,
+    },
+    {
+      name: "Email ID",
+      selector: (row) => row.client.email,
+      sortable: true,
+      grow: 2,
+    },
+    {
+      name: "Pin Code",
+      selector: (row) => row.client.pinCode,
+      sortable: true,
+      grow: 2,
+    },
+    {
+      name: "Product Type",
+      selector: (row) => row.productType.name,
+      sortable: true,
+      grow: 2,
+    },
+    {
+      name: "Item Name",
+      selector: (row) => row.itemName.name,
+      sortable: true,
+      grow: 2,
+    },
+    {
+      name: "Points",
+      selector: (row) => row.points.value,
+      sortable: true,
+      grow: 2,
+    },
+    {
+      name: "Length",
+      selector: (row) => row.Length,
+      sortable: true,
+      grow: 2,
+    },
+    {
+      name: "Action",
+      cell: (row, index, column, id) => {
+        return (
+          <>
+            <FontAwesomeIcon
+              className="Delete-btn"
+              icon={faTrash}
+              size="1x"
+              variant="primary"
+              onClick={() => deleteClient(row._id)}
+            />
+          </>
+        );
+      },
+    },
+  ];
 
   return (<>
     <div className="selectclient_main">
@@ -97,6 +262,10 @@ const PurchaseOrders = () => {
         enableReinitialize
         initialValues={{
           client: "",
+          productType: "",
+          itemName: "",
+          points: "",
+          Length:""
         }}
       >
         {(formik) => (
@@ -143,15 +312,10 @@ const PurchaseOrders = () => {
                   disabled
                   name="clientPhoneNumber"
                   placeholder="Phone Number"
-                  value={clientsName.PhoneNumber}
-                  onBlur={formik.handleBlur}
-                  isValid={formik.touched.clientPhoneNumber && !formik.errors.clientPhoneNumber}
-                  isInvalid={formik.touched.clientPhoneNumber && formik.errors.clientPhoneNumber}
+                  value={clientsName?.PhoneNumber}               
                 >
                 </Form.Control>
-                <Form.Control.Feedback type="invalid">
-                  {formik.errors.clientPhoneNumber}
-                </Form.Control.Feedback>
+              
               </Form.Group>
               <Form.Group controlId="clientemail" as={Col} hasValidation>
                 <Form.Label className="form__label"></Form.Label>
@@ -160,15 +324,10 @@ const PurchaseOrders = () => {
                   disabled
                   name="clientemail"
                   placeholder="E-mail"
-                  value={clientsName.email}
-                  onBlur={formik.handleBlur}
-                  isValid={formik.touched.clientemail && !formik.errors.clientemail}
-                  isInvalid={formik.touched.clientemail && formik.errors.clientemail}
+                  value={clientsName?.email}
                 >
                 </Form.Control>
-                <Form.Control.Feedback type="invalid">
-                  {formik.errors.clientemail}
-                </Form.Control.Feedback>
+               
               </Form.Group>
               <Form.Group controlId="clientpincode" as={Col} hasValidation>
                 <Form.Label className="form__label"></Form.Label>
@@ -177,35 +336,13 @@ const PurchaseOrders = () => {
                   disabled
                   name="clientpincode"
                   placeholder="Pin Code"
-                  value={clientsName.pinCode}
-                  onBlur={formik.handleBlur}
-                  isValid={formik.touched.clientpincode && !formik.errors.clientpincode}
-                  isInvalid={formik.touched.clientpincode && formik.errors.clientpincode}
+                  value={clientsName?.pinCode}
                 >
                 </Form.Control>
-                <Form.Control.Feedback type="invalid">
-                  {formik.errors.clientpincode}
-                </Form.Control.Feedback>
+                
               </Form.Group>
             </div>
-          </Form>
-        )}
-      </Formik>
-    </div>
-    <div className="purchaseOrder_main">
-      <Formik
-        validationSchema={schema}
-        onSubmit={(values, { resetForm }) => handleSubmit(values, resetForm)}
-        enableReinitialize
-        initialValues={{
-          productType: "",
-          itemType: "",
-          points: "",
-        }}
-      >
-        {(formik) => (
-          // Create Purchase Order
-          <Form onSubmit={formik.handleSubmit}>
+            <div className="purchaseOrder_main" >
             <h5>Create Purchase Order</h5>
             <div className="purchaseOrder_dropdown">
               <Form.Group controlId="productType" as={Col} hasValidation>
@@ -265,7 +402,7 @@ const PurchaseOrders = () => {
                   })}
                 </Form.Control>
                 <Form.Control.Feedback type="invalid">
-                  {formik.errors.itemType}
+                  {formik.errors.itemName}
                 </Form.Control.Feedback>
               </Form.Group>
               <Form.Group controlId="points" as={Col} hasValidation>
@@ -286,7 +423,7 @@ const PurchaseOrders = () => {
                   </option>
                   {points.map((elem, index) => {
                     return (
-                      <option key={index} value={elem.name}>
+                      <option key={index} value={elem._id}>
                         {elem.value}
                       </option>
                     );
@@ -309,14 +446,169 @@ const PurchaseOrders = () => {
                   isInvalid={formik.touched.Length && formik.errors.Length}
                 ></Form.Control>
                 <Form.Control.Feedback type="invalid">
-                  {formik.errors.points}
+                  {formik.errors.Length}
                 </Form.Control.Feedback>
               </Form.Group>
             </div>
+            </div>
+            <Button variant="primary" type="submit"  className="purchase_order_submit_button" >Submit</Button>
           </Form>
         )}
       </Formik>
     </div>
+    <div className="table_divss">
+    <h5>History</h5>
+        <DataTable
+          data={tableData}
+          columns={clientDataColumns}
+          highlightOnHover
+          responsive
+          pagination
+        />
+      </div>
+
+
+    <Modal show={show} onHide={handleClose}>
+        <Modal.Header>
+          <Modal.Title>Invoice#:{tableData.length} </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+                <Row>
+                <Col>
+                    <Form.Group
+                      role="form"
+                      className="mb-3"
+                      controlId="formBasicDate"
+                    >
+                      <Form.Label>Date</Form.Label>
+                      <Form.Control
+                        type="text"
+                        disabled
+                        placeholder="Date"
+                        name="Date"
+                        value={new Date().toLocaleString()}
+                      />
+                    
+                    </Form.Group>
+                  </Col>
+                  <Col>
+                    <Form.Group
+                      role="form"
+                      className="mb-3"
+                      controlId="formBasicname"
+                    >
+                      <Form.Label>Client Name</Form.Label>
+                      <Form.Control
+                        type="text"
+                        placeholder="Client Name"
+                        name="name"
+                        value={clientData.Name}
+                      disabled
+                      />
+                      
+                    </Form.Group>
+                  </Col>
+                  </Row>
+                  <Row>
+                <Col>
+                    <Form.Group
+                      role="form"
+                      className="mb-3"
+                      controlId="formBasicphonenumber"
+                    >
+                      <Form.Label>Phone Number</Form.Label>
+                      <Form.Control
+                        type="text"
+                      disabled
+                        placeholder="Phone Number"
+                        name="phonenumber"
+                        value={clientData.PhoneNumber}
+                      />
+                     
+                    </Form.Group>
+                  </Col>
+                  <Col>
+                    <Form.Group
+                      role="form"
+                      className="mb-3"
+                      controlId="formBasicEmail"
+                    >
+                      <Form.Label>Email</Form.Label>
+                      <Form.Control
+                        type="email"
+                        disabled
+                        placeholder="Email"
+                        name="email"
+                        value={clientData.email}
+                      />
+                     </Form.Group>
+                  </Col>
+                    </Row>
+            <Row>
+                <Col>
+                    <Form.Group
+                      role="form"
+                      className="mb-3"
+                      controlId="formBasicaddress"
+                    >
+                      <Form.Label>Address</Form.Label>
+                      <Form.Control
+                        type="text"
+                        placeholder="Address"
+                        name="Address"
+                        value={clientData.Address}
+                       disabled
+                      />
+                     
+                    </Form.Group>
+                  </Col>
+                  <Col>
+                    <Form.Group
+                      role="form"
+                      className="mb-3"
+                      controlId="formBasicpinCode"
+                    >
+                      <Form.Label>Pin Code</Form.Label>
+                      <Form.Control
+                        type="text"
+                        placeholder="Pin Code"
+                        name="pinCode"
+                        value={clientData.pinCode}
+                       disabled
+                      />
+                      </Form.Group>
+                  </Col>
+                    </Row>
+            </Modal.Body>
+        <Modal.Footer>
+        <Table striped bordered hover size="sm">
+      <thead>
+        <tr>
+          <th>ProductType</th>
+          <th>Item Name</th>
+          <th>Points</th>
+          <th>Length</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr> 
+          <td>{submitData.productName} </td>   
+          <td>{submitData.itamName} </td>
+          <td>{submitData.productPoint} </td>    
+          <td>{submitData.productLength} </td>   
+        </tr>
+      </tbody>
+    </Table>
+
+
+
+
+
+          <Button variant="secondary" onClick={handleClose}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
   </>
   );
 };

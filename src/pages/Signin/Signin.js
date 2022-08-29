@@ -21,7 +21,6 @@ const Signin = () => {
     try {
       let res = await api.post("/users/login", values);
       loginSuccess(res.data.token, res.data.user);
-      debugger;
       navigate("/");
       resetForm();
     } catch (error) {
