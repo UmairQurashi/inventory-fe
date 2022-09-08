@@ -22,9 +22,9 @@ const AppRoutes = () => {
         exact
         path="/"
         element={
-          <ProtectedAuthRoute>
+          // <ProtectedAuthRoute>
             <Products />
-          </ProtectedAuthRoute>
+          // </ProtectedAuthRoute>
         }
       />
       <Route exact path="/coilstock" element={<CoilStock />} />
@@ -37,9 +37,9 @@ const AppRoutes = () => {
         exact
         path="/purchaseorders"
         element={
-          <ProtectedAuthRoute>
+          // <ProtectedAuthRoute>
             <PurchaseOrders />
-          </ProtectedAuthRoute>
+          // </ProtectedAuthRoute>
         }
       />
       <Route exact path="/rawmaterial" element={<RawMaterial />} />
@@ -49,9 +49,9 @@ const AppRoutes = () => {
         exact
         path="/createuser"
         element={
-          <ProtectedAuthRoute>
+          // <ProtectedAuthRoute>
             <CreateClient />
-          </ProtectedAuthRoute>
+          // </ProtectedAuthRoute>
         }
       />
       <Route exact path="/signout" element={<Logout />} />
@@ -60,9 +60,9 @@ const AppRoutes = () => {
         exact
         path="/signin"
         element={
-          <ProtectedRoute>
+          // <ProtectedRoute>
             <Signin />
-          </ProtectedRoute>
+          // </ProtectedRoute>
         }
       />
     </Routes>

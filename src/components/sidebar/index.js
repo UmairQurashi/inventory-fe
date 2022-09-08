@@ -222,8 +222,87 @@ const SideBar = ({ children }) => {
           <main style={{ margin: "7px", width: "100%",overflow: "hidden" }}>{children}</main>
         </div>
       ) : (
-        children
-      )}
+        // children
+            //  used project cv
+            <div className="main-container">
+            <motion.div
+              animate={{
+                width: isOpen ? "200px" : "45px",
+  
+                transition: {
+                  duration: 0.3,
+                  type: "spring",
+                  damping: 10,
+                },
+              }}
+              className={`sidebar `}
+            >
+              <div className="top_section">
+                <AnimatePresence>
+                  {isOpen && (
+                    <motion.h1
+                      variants={showAnimation}
+                      initial="hidden"
+                      animate="show"
+                      exit="hidden"
+                      className="logo"
+                    ></motion.h1>
+                  )}
+                </AnimatePresence>
+             {isOpen?<img src={Logo} style={{width: "62%"}} />:''}
+                <div
+                  className="bars"
+                  style={{ fontSize: "22px", cursor: "pointer" }}
+                >
+                  <FontAwesomeIcon icon={faBars} onClick={toggle} />
+                </div>
+              </div>
+  
+              <section className="routes">
+                {routes.map((route, index) => {
+                  if (route.subRoutes) {
+                    return (
+                      <SidebarMenu
+                        setIsOpen={setIsOpen}
+                        route={route}
+                        showAnimation={showAnimation}
+                        isOpen={isOpen}
+                      />
+                    );
+                  }
+  
+                  return (
+                    <NavLink
+                      to={route.path}
+                      key={index}
+                      className="link sidebar_Navlink"
+                      activeClassName="active"
+                    >
+                      <div style={{ fontSize: "22px" }} onClick={toggle}>
+                        {route.icon}
+                      </div>
+                      <AnimatePresence>
+                        {isOpen && (
+                          <motion.div
+                            variants={showAnimation}
+                            initial="hidden"
+                            animate="show"
+                            exit="hidden"
+                            className="link_text"
+                          >
+                            {route.name}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </NavLink>
+                  );
+                })}
+              </section>
+            </motion.div>
+  
+            <main style={{ margin: "7px", width: "100%",overflow: "hidden" }}>{children}</main>
+          </div>
+)}
     </>
   );
 };
